@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block main %}
+
+    <!-- Start All Pages -->
+    <div class="all-page-title page-breadcrumb">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1>Blog</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End All Pages -->
+
+    <!-- Start blog details -->
+    <div class="blog-box">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="heading-title text-center">
+                        <h2>Blog</h2>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-8 col-lg-8 col-12">
+                    <div class="blog-inner-details-page">
+                        <div class="blog-inner-box">
+                            <div class="side-blog-img" style="width: fit-content">
+                                <img class="img-fluid" src="{{ blog.image.url }}" alt="blog image">
+                                <div class="date-blog-up">
+                                    {{ blog.category }}
+                                </div>
+                            </div>
+                            <div class="inner-blog-detail details-page">
+                                <h3>{{ blog.title }}</h3>
+                                <ul>
+                                    <li><i class="zmdi zmdi-account"></i>Posted By :
+                                        <span>{{ blog.author.first_name }} {{ blog.author.last_name }}</span>
+                                    </li>
+                                    <li>|</li>
+                                    <li><i class="zmdi zmdi-time"></i>Time :
+                                        <span>{{ blog.created_at|date:'Y m d' }}</span>
+                                    </li>
+                                </ul>
+                                <p>{{ blog.body }}</p>
+                            </div>
+                        </div>
+                        <div class="blog-comment-box">
+                            <h3>Comments</h3>
+                            {% for comment in blog.comments.all %}
+                                {% if comment.parent == null %}
+                                    <div class="comment-item">
+                                        <div>
+                                            <div class="pull-left">
+                                                <span>{{ comment.name.capitalize }}</span>
+                                            </div>
+                                            <div class="pull-right">
+                                                <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                                Date :<span>{{ comment.created_at|date:'Y m d' }}</span>
+                                            </div>
+                                            <div class="des-l">
+                                                <p>{{ comment.text }}</p>
+                                            </div>
+                                            <button class="btn btn-common" onclick="setParentId({{ comment.id }})">
+                                                <i class="fa fa-reply" aria-hidden="true"></i>
+                                                Reply
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% for reply in comment.replies.all %}
+                                        <div class="comment-item children">
+                                            <div>
+                                                <div class="pull-left">
+                                                    <span>{{ reply.name.capitalize }}</span>
+                                                </div>
+                                                <div class="pull-right">
+                                                    <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                                    Date :<span>{{ comment.created_at|date:'Y m d' }}</span>
+                                                </div>
+                                                <div class="des-l">
+                                                    <p>{{ reply.text }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="comment-respond-box">
+                            <h3>Leave your comment</h3>
+                            <div class="comment-respond-form">
+                                <form id="commentrespondform" class="comment-form-respond row" method="post">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6 col-md-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input id="name_com" class="form-control" name="name" placeholder="Name"
+                                                   type="text">
+                                        </div>
+                                        <div class="form-group">
+                                            <input id="email_com" class="form-control" name="email"
+                                                   placeholder="Your Email" type="email">
+                                        </div>
+                                        <div class="form-group">
+                                            <input id="parent_id" name="parent_id" type="number" value="" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6">
+                                        <div class="form-group">
+                                            <textarea class="form-control" id="textarea_com" placeholder="Your Message"
+                                                      rows="2" name="text"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <button class="btn btn-submit" type="submit">Submit comment</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-8 col-12 blog-sidebar">
+                    <div class="right-side-blog">
+                        <h3>Search</h3>
+                        <form method="post" action="{% url 'blog:blogSearch_page' %}">
+                            {% csrf_token %}
+                            <div class="blog-search-form">
+                                <input name="search" placeholder="Search blog" type="text">
+                                <button class="search-btn">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </form>
+                        <h3>Categories</h3>
+                        <div class="blog-categories">
+                            {% for category in categorys %}
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'blog:blogCategoryList_page' category.slug %}"><span>{{ category.title }}</span></a>
+                                    </li>
+                                </ul>
+                            {% endfor %}
+                        </div>
+                        <h3>Recent Post</h3>
+                        <div class="post-box-blog">
+                            <div class="recent-post-box">
+                                {% for blog in recent_blog %}
+                                    {% if blog.situation %}
+                                        <div class="recent-box-blog">
+                                            <a href="{% url 'blog:blogDetail_page' blog.slug %}">
+                                                <div class="recent-img">
+                                                    <img class="img-fluid" src="{{ blog.image.url }}" alt="blog image"
+                                                         style="width: 80px;height: 80px">
+                                                </div>
+                                                <div class="recent-info">
+                                                    <ul>
+                                                        <li>
+                                                            <i class="zmdi zmdi-account"></i>
+                                                            Posted By :
+                                                            <span>{{ blog.author.first_name }} {{ blog.author.last_name }}</span>
+                                                        </li>
+                                                        <li>|</li>
+                                                        <li><i class="zmdi zmdi-time"></i>Date :
+                                                            <span>{{ blog.created_at|date:'Y m d' }}</span></li>
+                                                    </ul>
+                                                    <h4>{{ blog.title }}</h4>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <h3>Recent Tag</h3>
+                        <div class="blog-tag-box">
+                            <ul class="list-inline tag-list">
+                                {% for tag in tags %}
+                                    <li class="list-inline-item">
+                                        <a href="{% url 'blog:blogTagList_page' tag.slug %}">{{ tag.title.capitalize }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- End details -->
+    <script>
+        const setParentId = id => {
+            let inputElem = document.getElementById('parent_id');
+            inputElem.value = id;
+            let inputsTitle = document.querySelector('.comment-respond-box h3');
+            inputsTitle.textContent = 'Leave your reply';
+            window.location.href = '#name_com';
+        }
+    </script>
+{% endblock %}
